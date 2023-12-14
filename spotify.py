@@ -31,6 +31,7 @@ def get_header(token):
     return {"Authorization": "Bearer " + token}
 
 def search_artist(token, name):
+    
     url = "https://api.spotify.com/v1/search"
     headers = get_header(token)
     query = f"?q={name}&type=artist&limit=1"
@@ -38,11 +39,34 @@ def search_artist(token, name):
 
     res = rq.get(query_url, headers=headers)
     json_res = json.loads(res.content)["artists"]["items"]
+    print(json_res)
     if len(json_res) == 0:
         return None
     else:
         
         return json_res[0]
     
+def playlist_id(token):
     
-print(search_artist(request_auth(), "Michael Jackson")["id"])
+    url = "https://api.spotify.com/v1/"
+    
+    headers = get_header(token)
+    query = "users/djfox90/playlists"
+    query_url = url + query
+
+    res = rq.get(query_url, headers=headers)
+    json_res = json.loads(res.content)['items']
+    for i in range(len(json_res)):
+        if json_res[i]['name'] == 'Test':
+            print('yes')
+            playlist_id = json_res[i]['id']
+            print(playlist_id)
+        else:
+            print('nop')
+
+    print("here")
+    
+    
+    
+
+playlist_id(request_auth())
