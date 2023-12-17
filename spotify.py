@@ -5,6 +5,8 @@ import json
 import requests as rq
 import spotify
 from fastapi.responses import HTMLResponse
+import numpy as np
+import random
 
 
 
@@ -61,7 +63,7 @@ def playlist_id(token):
 
     res = rq.get(query_url, headers=headers)
     json_res = json.loads(res.content)['items']
-    print(json_res)
+    
     for i in range(len(json_res)):
         if json_res[i]['name'] == 'Lex':
           
@@ -81,6 +83,9 @@ def playlist_songs(token,playlist_id):
     json_res = json.loads(res.content)['items']
     total_next = json.loads(res.content)["next"]
     total_songs = json.loads(res.content)["total"]
+    random_playlist = np.full(shape=total_songs,fill_value="0",dtype=object)
+    
+
     offset = "0"
     if total_next != None:
         offset = "100"
@@ -92,11 +97,20 @@ def playlist_songs(token,playlist_id):
   
     
     exit = False
+    
     while  exit != True:
         
         for i in range(len(json_res)):
-           count = count + 1
-           print(json_res[i]['track']['name'])
+            rand_exit = False
+            while rand_exit != True:
+                random_num = random.randint(0,total_songs-1)
+               
+                if random_playlist[random_num] == "0":
+                    random_playlist[random_num] = json_res[i]['track']['name']
+                    rand_exit = True
+                    
+            
+            
         if total_next == None:
             exit = True
         else:
@@ -106,6 +120,8 @@ def playlist_songs(token,playlist_id):
             offset = str(offset)
             next_string = "https://api.spotify.com/v1/playlists/4k7YATTCAkMVJoArqc8xbn/tracks?offset=" + offset + "&limit=100" 
             total_next = json.loads(res_next.content)["next"]
+            
+    print(random_playlist)
 
 
 playlist=playlist_id(request_auth())
