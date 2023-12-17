@@ -3,6 +3,10 @@ import base64
 import os
 import json
 import requests as rq
+import spotify
+from fastapi.responses import HTMLResponse
+
+
 
 load_dotenv(find_dotenv())
 
@@ -24,6 +28,7 @@ def request_auth():
     res = rq.post(url, headers=headers, data=params)
     json_res = json.loads(res.content)
     token = json_res["access_token"]
+    
     return token
 
 
@@ -56,17 +61,55 @@ def playlist_id(token):
 
     res = rq.get(query_url, headers=headers)
     json_res = json.loads(res.content)['items']
+    print(json_res)
     for i in range(len(json_res)):
-        if json_res[i]['name'] == 'Test':
-            print('yes')
+        if json_res[i]['name'] == 'Lex':
+          
             playlist_id = json_res[i]['id']
-            print(playlist_id)
+      
+    return playlist_id
+
+   
+def playlist_songs(token,playlist_id):
+    
+    url = "https://api.spotify.com/v1/"
+    headers = get_header(token)
+    query = "playlists/" + playlist_id + "/tracks"
+    query_url = url + query
+
+    res = rq.get(query_url, headers=headers)
+    json_res = json.loads(res.content)['items']
+    total_next = json.loads(res.content)["next"]
+    total_songs = json.loads(res.content)["total"]
+    offset = "0"
+    if total_next != None:
+        offset = "100"
+    next_string = "https://api.spotify.com/v1/playlists/4k7YATTCAkMVJoArqc8xbn/tracks?offset=" + offset + "&limit=100"   
+
+    res_next = rq.get(next_string, headers=headers)
+   
+    count = 0
+  
+    
+    exit = False
+    while  exit != True:
+        
+        for i in range(len(json_res)):
+           count = count + 1
+           print(json_res[i]['track']['name'])
+        if total_next == None:
+            exit = True
         else:
-            print('nop')
+            res_next = rq.get(next_string, headers=headers)
+            json_res = json.loads(res_next.content)['items']
+            offset = int(offset) + 100
+            offset = str(offset)
+            next_string = "https://api.spotify.com/v1/playlists/4k7YATTCAkMVJoArqc8xbn/tracks?offset=" + offset + "&limit=100" 
+            total_next = json.loads(res_next.content)["next"]
 
-    print("here")
-    
-    
-    
 
-playlist_id(request_auth())
+playlist=playlist_id(request_auth())
+
+playlist_songs(request_auth(),playlist)
+
+#create_playlist(request_auth())
