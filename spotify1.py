@@ -3,7 +3,7 @@ import base64
 import os
 import json
 import requests as rq
-import spotify
+import spotify1
 from fastapi.responses import HTMLResponse
 import numpy as np
 import random
@@ -81,6 +81,7 @@ def playlist_songs(token,playlist_id):
 
     res = rq.get(query_url, headers=headers)
     json_res = json.loads(res.content)['items']
+    print(json_res[0]['track']['uri'])
     total_next = json.loads(res.content)["next"]
     total_songs = json.loads(res.content)["total"]
     random_playlist = np.full(shape=total_songs,fill_value="0",dtype=object)
